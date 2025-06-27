@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Payment Dashboard{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-primary mb-4 text-center">💳 Payment Dashboard</h2>
+
+ 
+
+
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'payment' in message.tags %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <!-- Payment Card Section -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white text-center fs-5 fw-semibold">
+          Your Payment Card
+        </div>
+        <div class="card-body">
+          {% if card %}
+            <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item"><strong>Card Holder:</strong> {{ card.card_holder }}</li>
+              <li class="list-group-item"><strong>Card Number:</strong> **** **** **** {{ card.card_number|slice:"-4:" }}</li>
+              <li class="list-group-item"><strong>Expiry:</strong> {{ card.expiry_month }}/{{ card.expiry_year }}</li>
+              <li class="list-group-item">
+                <strong>Card Type:</strong>
+                {% if card.card_type == "Visa" %}
+                  <img src="{% static 'images/visa.png' %}" alt="Visa" width="60">
+                {% elif card.card_type == "Mastercard" %}
+                  <img src="{% static 'images/mastercard.png' %}" alt="Mastercard" width="60">
+                {% else %}
+                  {{ card.card_type }}
+                {% endif %}
+              </li>
+            </ul>
+            <div class="d-flex justify-content-center gap-2">
+              <button class="btn btn-secondary" disabled>✔️ Card Already Added</button>
+              <form method="POST" action="{% url 'delete-payment-card' secure_token=secure_token %}" id="delete-card-form">
+                {% csrf_token %}
+                <button type="button" id="delete-card-btn" class="btn btn-danger">🗑 Delete Card</button>
+              </form>
+            </div>
+          {% else %}
+            <form method="POST" action="{% url 'add-payment-card' secure_token=secure_token %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Card Holder</label>
+                <input type="text" name="card_holder" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Card Number</label>
+                <input type="text" name="card_number" class="form-control" maxlength="16" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Card Type</label>
+                <select name="card_type" class="form-select">
+                  <option value="Visa">Visa</option>
+                  <option value="Mastercard">Mastercard</option>
+                </select>
+              </div>
+              <div class="row mb-3">
+                <div class="col">
+                  <label class="form-label">Expiry Month</label>
+                  <select name="expiry_month" class="form-select">
+                    {% for m in months %}
+                      <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col">
+                  <label class="form-label">Expiry Year</label>
+                  <select name="expiry_year" class="form-select">
+                    {% for y in years %}
+                      <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success w-100">💾 Add Card</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Summary Section -->
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white text-center fs-5 fw-semibold">
+          Purchase Summary
+        </div>
+        <div class="card-body">
+          <!-- Total Boxes Row -->
+          <div class="row justify-content-center g-3 mb-4">
+            <div class="col-md-6 col-12">
+              <div class="border rounded p-3 bg-light text-center shadow-sm h-100">
+                <div class="fs-5 fw-semibold text-success mb-1">💰 Total Spent</div>
+                <div class="fs-4 fw-bold text-success">${{ total_spent|floatformat:2 }}</div>
+              </div>
+            </div>
+            <div class="col-md-6 col-12">
+              <div class="border rounded p-3 bg-light text-center shadow-sm h-100">
+                <div class="fs-5 fw-semibold text-primary mb-1">📄 Page Total</div>
+                <div class="fs-4 fw-bold text-primary">${{ page_total|floatformat:2 }}</div>
+              </div>
+            </div>
+          </div>
+
+          {% if reservations %}
+            <div class="list-group shadow-sm mb-4 rounded-4 border border-secondary bg-white">
+              {% for r in reservations %}
+                <div
+                  class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4"
+                  style="transition: background-color 0.25s ease, box-shadow 0.25s ease; cursor: default;"
+                  onmouseover="this.style.backgroundColor='#f1f5f9'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                  onmouseout="this.style.backgroundColor='white'; this.style.boxShadow='none'">
+                  <div>
+                    <h6 class="mb-1 fw-bold text-primary text-truncate" style="max-width: 280px;" title="{{ r.event.title }}">
+                      🎫 {{ r.event.title }}
+                    </h6>
+                    <small class="text-muted" style="letter-spacing: 0.02em; font-size: 0.9rem;">
+                      {{ r.quantity }} × ${{ r.event.ticket_price|floatformat:2 }} =
+                      <span class="fw-semibold text-success">${{ r.total_price|floatformat:2 }}</span>
+                    </small>
+                  </div>
+                  <span class="badge bg-success rounded-pill px-4 py-2 fs-6 shadow" title="Total Price">
+                    💵 ${{ r.total_price|floatformat:2 }}
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
+
+            {% if reservations.has_other_pages %}
+              <nav aria-label="Page navigation" class="d-flex justify-content-center">
+                <ul class="pagination pagination-sm shadow rounded-3 border border-light p-2">
+                  {% if reservations.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link text-primary fw-semibold" href="?page={{ reservations.previous_page_number }}">← Prev</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled"><span class="page-link text-muted">← Prev</span></li>
+                  {% endif %}
+                  {% for page_num in reservations.paginator.page_range %}
+                    <li class="page-item {% if page_num == reservations.number %}active{% endif %}">
+                      <a class="page-link {% if page_num == reservations.number %}bg-primary text-white fw-bold{% else %}text-primary{% endif %}" href="?page={{ page_num }}">{{ page_num }}</a>
+                    </li>
+                  {% endfor %}
+                  {% if reservations.has_next %}
+                    <li class="page-item">
+                      <a class="page-link text-primary fw-semibold" href="?page={{ reservations.next_page_number }}">Next →</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled"><span class="page-link text-muted">Next →</span></li>
+                  {% endif %}
+                </ul>
+              </nav>
+            {% endif %}
+          {% else %}
+            <div class="alert alert-info text-center rounded-pill shadow-sm mt-4 fs-6 fw-semibold" role="alert">
+              🚫 No purchases yet
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SweetAlert Delete Card Script -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById("delete-card-btn")?.addEventListener("click", function () {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "Card Number: **** **** **** {{ card.card_number|slice:'-4:' }}",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById("delete-card-form").submit();
+      }
+    });
+  });
+</script>
+
+{% endblock %}

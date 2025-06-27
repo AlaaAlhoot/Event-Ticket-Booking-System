@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}My Complaints{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-primary mb-4">📋 My Complaints</h2>
+
+  {% if complaints %}
+    <div class="list-group">
+      {% for complaint in complaints %}
+        <div class="list-group-item list-group-item-action mb-3">
+          <h5 class="mb-1">
+            Status:
+            {% if complaint.status == 'responded' %}
+              <span class="badge bg-success">Responded</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+          </h5>
+
+          <p class="mb-1"><strong>Message:</strong> {{ complaint.message }}</p>
+
+          {% if complaint.status == 'responded' and complaint.admin_response %}
+            <p class="mb-1 text-success"><strong>Admin Response:</strong> {{ complaint.admin_response }}</p>
+          {% endif %}
+
+          <small class="text-muted">Submitted on {{ complaint.created_at }}</small>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">You haven't submitted any complaints yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

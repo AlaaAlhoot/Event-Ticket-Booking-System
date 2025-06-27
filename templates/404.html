@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="error-box">
+        <h1 class="display-1 text-danger fw-bold animate-bounce">404</h1>
+        <h3 class="text-secondary">Oops! Page Not Found</h3>
+        <p class="lead text-muted">The page you're looking for doesn't exist or may have been moved.</p>
+        <a href="{% url 'about' %}" class="btn btn-primary btn-lg mt-3 animate-fade">🏠 Return Home</a>
+    </div>
+</div>
+
+<style>
+
+    body {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        color: #333;
+        font-family: Arial, sans-serif;
+    }
+
+    .error-box {
+        padding: 40px;
+        border-radius: 10px;
+        background: white;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 1.5s ease-in-out;
+    }
+
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade {
+        animation: fadeIn 1.5s ease-in-out;
+    }
+
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .animate-bounce {
+        animation: bounce 1s infinite alternate;
+    }
+
+
+    .btn-primary {
+        transition: 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

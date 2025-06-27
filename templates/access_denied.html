@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 40px;
+    max-width: 500px;
+    margin: 100px auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+  }
+
+  .glass-card h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .glass-card p {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+  }
+
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid #fff;
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .btn-glass:hover {
+    background: #fff;
+    color: #2a5298;
+    font-weight: bold;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<!-- Access Denied Card -->
+<div class="glass-card">
+  <!-- Lottie Animation -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <lottie-player
+    src="https://assets2.lottiefiles.com/packages/lf20_ydo1amjm.json"
+    background="transparent"
+    speed="1"
+    style="width: 220px; height: 220px; margin: auto;"
+    loop autoplay>
+  </lottie-player>
+
+  <h1>Access Denied</h1>
+  <p>Sorry, you don’t have permission to view this page.<br>Please login or return to the homepage.</p>
+
+  {% if not request.user.is_authenticated %}
+    <a href="{% url 'login' %}" class="btn btn-glass me-2">🔑 Login</a>
+  {% else %}
+    <a href="{% url 'home' %}" class="btn btn-glass">🏠 Home</a>
+  {% endif %}
+</div>
+{% endblock %}

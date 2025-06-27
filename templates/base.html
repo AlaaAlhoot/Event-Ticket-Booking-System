@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Event Ticket Booking{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">🎟️ TicketSystem</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+
+          {% if request.user.is_authenticated and request.user.userprofile.role == 'organizer' %}
+            <li class="nav-item">
+{#              <a href="{% url 'event-create' secure_token=request.user.userprofile.secure_token %}" class="nav-link">Create Event</a>#}
+            </li>
+          {% endif %}
+
+          <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/complaints/new/">File Complaint</a></li>
+
+          {% if request.user.is_authenticated %}
+            {% if request.user.userprofile.role == 'organizer' %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'organizer-dashboard' secure_token=request.user.userprofile.secure_token %}">Organizer Dashboard</a>
+              </li>
+            {% elif request.user.is_superuser %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'supervisor-panel' %}">Supervisor Panel</a>
+              </li>
+            {% endif %}
+          {% endif %}
+        </ul>
+
+        <!-- SEARCH BAR -->
+        <form class="d-flex me-3" method="get" action="/search/">
+          <input class="form-control me-2" type="search" name="q" placeholder="Search events..." aria-label="Search" />
+          <button class="btn btn-outline-light" type="submit">Search</button>
+        </form>
+
+        <!-- USER MENU -->
+        <ul class="navbar-nav">
+          {% if request.user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                👤 {{ request.user.first_name }} ({{ request.user.userprofile.role|capfirst }})
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'profile' %}">View Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'edit-profile' %}">Edit Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'complaint-list' %}">Complaints</a></li>
+
+                {% if request.user.userprofile.role == 'attendee' %}
+                  <li>
+                    <a class="dropdown-item" href="{% url 'payment-dashboard' secure_token=request.user.userprofile.secure_token %}">Payment Dashboard</a>
+                  </li>
+                {% endif %}
+
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Logout</a></li>
+              </ul>
+            </li>
+
+            {% if request.user.userprofile.role == 'attendee' %}
+              <li class="nav-item">
+                <a href="{% url 'my_tickets_attendee' secure_token=request.user.userprofile.secure_token %}" class="btn btn-warning ms-2">🛒 My Tickets</a>
+              </li>
+            {% endif %}
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+            <li class="nav-item">
+              <span class="nav-link disabled text-white-50">👤 Not Yet Registered</span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container mt-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark text-light mt-5 pt-4 pb-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6 col-md-4 mb-3">
+          <h5>About</h5>
+          <p>Event Ticket Booking is your trusted platform for discovering and organizing exciting events across the city.</p>
+        </div>
+        <div class="col-sm-6 col-md-2 mb-3">
+          <h5>Explore</h5>
+          <ul class="list-unstyled">
+            <li><a href="/" class="text-light">Home</a></li>
+            <li><a href="/about/" class="text-light">About</a></li>
+            <li><a href="{% url 'login' %}" class="text-light">Login</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <h5>Support</h5>
+          <ul class="list-unstyled">
+            <li><a href="/complaints/new/" class="text-light">Complaint</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-6 col-md-3 text-md-end">
+          <h5>Contact</h5>
+          <p>Email: alaa_support@ticketbooking.com</p>
+          <p>&copy; 2025 TicketSystem</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

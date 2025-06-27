@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Redirecting to Payment{% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+Swal.fire({
+  icon: 'warning',
+  title: '⚠️ No Payment Card Found',
+  text: 'Redirecting you to the payment page in 5 seconds...',
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 5000,
+  timerProgressBar: true,
+  didClose: () => {
+    window.location.href = "/user/{{ secure_token|urlencode }}/payment/";
+  }
+});
+</script>
+<div class="container text-center mt-5">
+  <div class="alert alert-warning p-4 shadow-sm">
+    <h4 class="mb-3">⚠️ No Payment Card on File</h4>
+    <p>Please add a payment card to proceed with your booking.</p>
+    <p class="text-muted">Redirecting shortly...</p>
+  </div>
+</div>
+{% endblock %}

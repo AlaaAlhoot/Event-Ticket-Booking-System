@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Profile Updated{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+  <h3 class="text-success">✅ Profile updated successfully!</h3>
+  <p>You will be logged out in <span id="countdown">5</span> seconds...</p>
+  <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-3">Logout Now</a>
+</div>
+
+<script>
+let seconds = 5;
+const countdown = document.getElementById("countdown");
+const interval = setInterval(() => {
+  seconds--;
+  countdown.textContent = seconds;
+  if (seconds === 0) {
+    clearInterval(interval);
+    window.location.href = "{% url 'logout' %}";
+  }
+}, 1000);
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Create Event{% endblock %}
+{% block content %}
+<div class="container col-md-8 mt-4">
+  <h2 class="mb-4 text-primary text-center">🎉 Create a New Event 🎉</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" action="">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Event Title</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="4" required></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Location</label>
+      <input type="text" name="location" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Event Date</label>
+      <input type="date" name="date" class="form-control" min="{{ today }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ticket Price ($)</label>
+      <input type="number" name="ticket_price" class="form-control" step="0.01" min="0" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Available Tickets</label>
+      <input type="number" name="available_tickets" class="form-control" min="1" required>
+    </div>
+
+    <button type="submit" class="btn btn-success w-100">Create Event</button>
+  </form>
+</div>
+{% endblock %}

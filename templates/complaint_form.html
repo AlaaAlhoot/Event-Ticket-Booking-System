@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+{% block title %}Submit a Complaint{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+  <h3 class="text-primary mb-4">📝 Submit a Complaint</h3>
+
+{% if messages %}
+  {% for message in messages %}
+    {% if 'payment' in message.tags %}
+      {% if 'success' in message.tags %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {% elif 'error' in message.tags or 'danger' in message.tags %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {% else %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+      {% endif %}
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
+
+
+
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {% if not request.user.is_authenticated %}
+      <div class="mb-3">
+        <label for="id_full_name" class="form-label">Full Name</label>
+        {{ form.full_name|add_class:"form-control" }}
+      </div>
+      <div class="mb-3">
+        <label for="id_email" class="form-label">Email Address</label>
+        {{ form.email|add_class:"form-control" }}
+      </div>
+    {% else %}
+      {{ form.full_name }}
+      {{ form.email }}
+    {% endif %}
+    <div class="mb-4">
+      <label for="id_message" class="form-label">Your Complaint</label>
+      {{ form.message|add_class:"form-control" }}
+    </div>
+    <button type="submit" class="btn btn-danger w-100 py-2">🚩 Submit Complaint</button>
+  </form>
+</div>
+{% endblock %}

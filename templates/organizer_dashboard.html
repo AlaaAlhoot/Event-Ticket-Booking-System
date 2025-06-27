@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Organizer Dashboard{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-center text-primary mb-4">Organizer Dashboard</h2>
+
+<div class="alert
+  {% if is_morning %}
+    bg-warning bg-opacity-25 border-warning
+  {% else %}
+    bg-info bg-opacity-25 border-info
+  {% endif %}
+  border-start border-5 rounded-4 shadow-sm d-flex align-items-center justify-content-between flex-wrap p-4 mb-4
+">
+  <div class="d-flex align-items-center gap-3">
+    <div class="fs-2">
+      {% if is_morning %}
+        🌅
+      {% else %}
+        🌙
+      {% endif %}
+    </div>
+    <h4 class="mb-0 text-dark fw-bold">{{ greeting_message }}</h4>
+  </div>
+  <button class="btn btn-lg btn-outline-success px-4 py-2 rounded-pill fw-bold shadow-sm mt-3 mt-md-0"
+        data-bs-toggle="modal" data-bs-target="#addEventModal"
+        style="box-shadow: 0 0 10px 2px rgba(40, 167, 69, 0.7);">
+  ➕ Add Event
+</button>
+
+</div>
+
+
+
+
+
+
+  <div class="row row-cols-7 g-3 mb-4 text-center">
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">📅</div>
+        <h6>Events</h6>
+        <p class="fw-bold text-success">{{ total_events }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">✅</div>
+        <h6>Active Tickets</h6>
+        <p class="fw-bold text-success">{{ active_tickets }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">❌</div>
+        <h6>Sold Out Tickets</h6>
+        <p class="fw-bold text-danger">{{ sold_out_tickets }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">🎟</div>
+        <h6>Total Tickets Booked</h6>
+        <p class="fw-bold text-success">{{ total_tickets }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">💵</div>
+        <h6>Revenue</h6>
+        <p class="fw-bold text-success">${{ revenue|floatformat:2 }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">🧾</div>
+        <h6>Platform Fee</h6>
+        <p class="fw-bold text-danger">${{ commission|floatformat:2 }}</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card p-3 shadow-sm border-0">
+        <div class="fs-3">📈</div>
+        <h6>Net Sales</h6>
+        <p class="fw-bold text-success">${{ net_sales|floatformat:2 }}</p>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for event in events %}
+    <div class="col position-relative">
+      <div class="card h-100 shadow border-0 rounded-4 overflow-hidden">
+    
+        <div class="position-absolute top-0 end-0 m-2">
+          {% if event.available_tickets > 0 %}
+            <span class="badge bg-success">Active</span>
+          {% else %}
+            <span class="badge bg-danger">Sold Out</span>
+          {% endif %}
+        </div>
+
+        <div class="card-body d-flex flex-column justify-content-between">
+          <h5 class="fw-bold">{{ event.title }}</h5>
+          <ul class="list-group list-group-flush small mb-3">
+            <li class="list-group-item border-0 d-flex justify-content-between">
+              <span>📅 Date:</span><span>{{ event.date }}</span>
+            </li>
+            <li class="list-group-item border-0 d-flex justify-content-between">
+              <span>🎟 Tickets Booked:</span><span>{{ event.ticket_count|default:0 }}</span>
+            </li>
+            <li class="list-group-item border-0 d-flex justify-content-between">
+              <span>🎫 Tickets Left:</span><span>{{ event.available_tickets }}</span>
+            </li>
+            <li class="list-group-item border-0 d-flex justify-content-between">
+              <span>💵 Price:</span><span>${{ event.ticket_price }}</span>
+            </li>
+            <li class="list-group-item border-0 d-flex justify-content-between">
+              <span>💰 Event Revenue:</span><span>${{ event.event_revenue|floatformat:2 }}</span>
+            </li>
+          </ul>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editModal{{ event.id }}">✏️ Edit</button>
+            <button class="btn btn-outline-danger rounded-pill delete-btn" data-id="{{ event.id }}" data-title="{{ event.title }}">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="editModal{{ event.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <form method="POST" action="{% url 'edit_event' secure_token event.id %}">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">Edit: {{ event.title }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3"><label>Title</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
+              <div class="mb-3"><label>Description</label><textarea name="description" class="form-control" rows="3" required>{{ event.description }}</textarea></div>
+              <div class="mb-3">
+                <label>Date</label>
+                <input type="date" name="date" class="form-control" value="{{ event.date|date:'Y-m-d' }}" min="{{ today }}" max="{{ max_date }}" required>
+                <small class="text-muted">Choose a date from today up to 3 years only.</small>
+              </div>
+              <div class="mb-3"><label>Location</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
+              <div class="mb-3"><label>Ticket Price</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
+              <div class="mb-3"><label>Available Tickets</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+
+  <div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'event-create' secure_token %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">➕ Add New Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+          <div class="mb-3">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Code</label>
+            <input type="text" name="code" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label>Date</label>
+            <input type="date" name="date" class="form-control" min="{{ today }}" max="{{ max_date }}" required>
+            <small class="text-muted">Choose a date from today up to 3 years only.</small>
+          </div>
+          <div class="mb-3">
+            <label>Location</label>
+            <input type="text" name="location" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Ticket Price</label>
+            <input type="number" name="ticket_price" step="0.01" min="0" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Available Tickets</label>
+            <input type="number" name="available_tickets" min="1" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'swal' in message.tags %}
+        Swal.fire({
+          icon: 'success',
+          title: '{{ message|escapejs }}',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eventId = btn.dataset.id;
+      const title = btn.dataset.title;
+
+      Swal.fire({
+        title: `Delete "${title}"?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete!',
+        cancelButtonText: 'Cancel'
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch(`{% url 'delete_event' secure_token 0 %}`.replace('/0/', `/${eventId}/`), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          }).then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Event deleted!',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => window.location.reload());
+          });
+        }
+      });
+    });
+  });
+</script>
+
+
+<style>
+  .row-cols-7 > * {
+    flex: 0 0 auto;
+    width: 14.2857%; 
+  }
+
+  @media (max-width: 992px) {
+    .row-cols-7 > * {
+      width: 33.333%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .row-cols-7 > * {
+      width: 50%;
+    }
+  }
+</style>
+    
+<style>
+  .btn-success {
+    background: linear-gradient(45deg, #28a745, #218838);
+    color: white;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background: linear-gradient(45deg, #218838, #1e7e34);
+  }
+  
+    .alert h4 {
+    font-size: 1.6rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .btn-outline-success {
+    font-size: 1rem;
+    transition: 0.3s ease-in-out;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #198754;
+    color: white;
+    transform: scale(1.03);
+  }
+</style>
+
+{% endblock %}

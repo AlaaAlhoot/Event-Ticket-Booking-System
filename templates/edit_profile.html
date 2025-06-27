@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container col-md-6 mt-4">
+  <h2 class="text-center text-primary mb-4">Edit Profile</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" action="{% url 'edit-profile' %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Full Name</label>
+      <input type="text" name="full_name" class="form-control" required value="{{ user.first_name }}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Current Password</label>
+      <input type="password" name="current_password" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">New Password</label>
+      <input type="password" id="password" name="password" class="form-control">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Confirm New Password</label>
+      <input type="password" id="confirm_password" name="confirm_password" class="form-control">
+    </div>
+
+    <!-- Password Strength Checker -->
+    <div class="mb-3">
+      <label class="form-label">Password must contain:</label>
+      <ul class="list-unstyled" id="password-criteria">
+        <li id="length" class="text-danger">❌ At least 8 characters</li>
+        <li id="lower" class="text-danger">❌ One lowercase letter</li>
+        <li id="upper" class="text-danger">❌ One uppercase letter</li>
+        <li id="number" class="text-danger">❌ One number</li>
+        <li id="symbol" class="text-danger">❌ One symbol</li>
+      </ul>
+    </div>
+
+    <button type="submit" class="btn btn-success w-100">Update Profile</button>
+  </form>
+</div>
+
+<script>
+const password = document.getElementById("password");
+const confirm = document.getElementById("confirm_password");
+
+const criteria = {
+  length: document.getElementById("length"),
+  lower: document.getElementById("lower"),
+  upper: document.getElementById("upper"),
+  number: document.getElementById("number"),
+  symbol: document.getElementById("symbol")
+};
+
+password?.addEventListener("input", () => {
+  const val = password.value;
+  const conditions = {
+    length: val.length >= 8,
+    lower: /[a-z]/.test(val),
+    upper: /[A-Z]/.test(val),
+    number: /\d/.test(val),
+    symbol: /[^A-Za-z0-9]/.test(val)
+  };
+
+  Object.entries(conditions).forEach(([key, valid]) => {
+    criteria[key].textContent = `${valid ? '✅' : '❌'} ${criteria[key].textContent.slice(2)}`;
+    criteria[key].className = valid ? 'text-success' : 'text-danger';
+  });
+});
+</script>
+{% endblock %}

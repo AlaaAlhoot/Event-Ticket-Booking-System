@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Event Details{% endblock %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Progress Bar Animation */
+  .progress-animated {
+    animation: growBar 1s ease-out forwards;
+  }
+
+  @keyframes growBar {
+    from { width: 0%; }
+    to { width: var(--bar-width); }
+  }
+
+  /* Alert Animation */
+  .fade-slide-alert {
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeSlide 0.6s forwards;
+  }
+
+  @keyframes fadeSlide {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Button Animation */
+  .animated-button {
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUpBtn 0.6s ease-out 0.3s forwards;
+  }
+
+  @keyframes slideUpBtn {
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="w-100" style="max-width: 600px;">
+
+    <h2 class="text-primary mb-4 text-center">🎟 Book Tickets for "{{ event.title }}"</h2>
+
+    {% if event.available_tickets == 0 %}
+      <div class="alert alert-warning d-flex align-items-center fade-slide-alert" role="alert">
+        <strong>❌ Tickets Unavailable:</strong>&nbsp; This event is fully booked.
+      </div>
+    {% endif %}
+
+    {% if event.total_tickets %}
+      {% with percent=event.available_tickets|floatformat:2|divisibleby:event.total_tickets|floatformat:0 %}
+        <div class="progress mb-4" role="progressbar" aria-valuenow="{{ event.available_tickets }}" aria-valuemin="0" aria-valuemax="{{ event.total_tickets }}">
+          <div class="progress-bar bg-success progress-animated"
+               style="--bar-width: {{ percent }}%; width: 0%;">
+            {{ event.available_tickets }} tickets remaining
+          </div>
+        </div>
+      {% endwith %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'book-ticket' event.id request.user.userprofile.secure_token %}" class="border p-4 rounded shadow-sm bg-white">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="quantity" class="form-label fw-bold">Number of Tickets:</label>
+        <input type="number" id="ticketQuantity" name="quantity"
+               min="1"
+               max="{{ event.available_tickets }}"
+               {% if event.available_tickets == 0 %}disabled{% endif %}
+               class="form-control form-control-lg"
+               placeholder="Enter quantity" required>
+        <small class="text-muted d-block mt-1">
+          Available: {{ event.available_tickets }} | Price: $<span id="price">{{ event.ticket_price }}</span>
+        </small>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold text-success">💰 Final Payment Amount:</label>
+        <div class="form-control bg-light" id="finalAmount">$0.00</div>
+      </div>
+
+      {% if event.available_tickets > 0 %}
+        <button type="submit" class="btn btn-primary w-100 btn-lg animated-button">✅ Confirm Booking</button>
+      {% else %}
+        <button type="button" class="btn btn-secondary w-100 btn-lg" disabled>❌ Tickets Unavailable</button>
+      {% endif %}
+    </form>
+
+  </div>
+</div>
+
+<script>
+  const quantityInput = document.getElementById("ticketQuantity");
+  const finalAmountDiv = document.getElementById("finalAmount");
+  const price = parseFloat(document.getElementById("price").innerText);
+
+  function updateFinalAmount() {
+    const quantity = parseInt(quantityInput.value);
+    if (!isNaN(quantity) && quantity > 0) {
+      const total = quantity * price;
+      finalAmountDiv.textContent = "$" + total.toFixed(2);
+    } else {
+      finalAmountDiv.textContent = "$0.00";
+    }
+  }
+
+  if (quantityInput) {
+    quantityInput.addEventListener("input", updateFinalAmount);
+  }
+</script>
+{% endblock %}
