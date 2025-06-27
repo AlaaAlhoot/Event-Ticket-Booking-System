@@ -1,0 +1,81 @@
+/* Reset and Base */
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding-bottom: 70px;
+}
+
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+a {
+  text-decoration: none;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+footer {
+  font-size: 0.9rem;
+  background-color: #212529;
+  color: #f8f9fa;
+}
+
+footer a {
+  color: #f8f9fa;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Cards */
+.card {
+  border: 1px solid #dee2e6;
+  transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-light:hover {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: black;
+}
+
+/* Forms */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+}
+
+/* Responsive spacing */
+@media (max-width: 576px) {
+  .navbar .form-inline {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 0 20px rgba(0, 123, 255, 0.2);
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
